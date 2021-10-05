@@ -13,7 +13,7 @@
                     {{user[1].name || user[1].email}}
                 </a>
             </label>
-            <buttom @click="unSelectedUser" class="unCheckUserId" v-if="currentUser === user[0]"><i class="fas fa-times"></i></buttom>
+            <button @click="unSelectedUser" class="unCheckUserId" v-if="currentUser === user[0]"><i class="fas fa-times"></i></button>
        </li>
     </ul>
 </template>

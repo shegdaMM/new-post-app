@@ -5,6 +5,7 @@ const API_URL = process.env.VUE_APP_URL;
 
 export default class UserNameMap {
     static map = {};
+    static badUserAccounts = {};
 
     static timer = setInterval(() => {
         localStorage.setItem('UserNameApp', UserNameMap.map);
@@ -31,15 +32,18 @@ export default class UserNameMap {
     static async updateUser (id) {
         let result = '';
         const Url = `${API_URL}/users/${id}`;
-        try {
-            await axios.get(Url).then(response => {
-                if (response.status === 200) {
-                    const user = response.data;
-                    UserNameMap.map[id] = { name: user.name, email: user.email, update: Date.now() };
-                    result = user.name ? user.name : user.email;
-                }
-            });
-        } catch (e) {
+        if (!(UserNameMap.badUserAccounts[id])) {
+            try {
+                await axios.get(Url).then(response => {
+                    if (response.status === 200) {
+                        const user = response.data;
+                        UserNameMap.map[id] = { name: user.name, email: user.email, update: Date.now() };
+                        result = user.name ? user.name : user.email;
+                    }
+                });
+            } catch (e) {
+                UserNameMap.badUserAccounts[id] = 'removed';
+            }
         }
         return result;
     };
