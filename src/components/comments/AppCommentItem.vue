@@ -53,8 +53,7 @@ export default {
             required: true
         },
         isShowInnerComments: {
-          type: Boolean,
-          default: false
+          type: String
         }
     },
     computed: {
@@ -67,7 +66,7 @@ export default {
     },
     watch: {
       isShowInnerComments () {
-          this.showInnerComment = this.isShowInnerComments;
+          this.showInnerComment = this.showInnerComment === 'show' ? 'hide' : 'show';
       }
     },
     methods: {
