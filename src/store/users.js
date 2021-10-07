@@ -70,20 +70,23 @@ export default {
         // user
         getUserById: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
+            let result;
             const Url = `${API_URL}/users/${payload.id}`;
             try {
                 await axios.get(Url).then(response => {
                   if (response.status === 200) {
                     commit('setUserById', response.data);
+                    result = response.data;
                   }
                 });
               } catch (error) {
                 // error
                 if (payload.id) {
-                    dispatch('errorNotify', { message: error, place: 'user' });
+                    // dispatch('errorNotify', { message: error, place: 'user' });
                 }
               }
             commit('onloadProcess');
+            return result;
         },
         removeUserById: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');

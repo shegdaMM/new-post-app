@@ -51,7 +51,7 @@ export default createStore({
     buildNotify: ({ commit }, payload) => {
       if (payload?.body?.message) {
         const result = {};
-        console.log(payload?.body?.message);
+        console.log(payload?.body);
         if (typeof payload?.body?.message === 'string') {
           result.message = payload?.body?.message;
         } else {

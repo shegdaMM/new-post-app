@@ -33,6 +33,7 @@ export default {
     },
     async created () {
         const count = await UserNameMap.updateAllMap();
+        // await usersService.getAllUsersObject();
         this.usersCount = Object.keys(count).length;
 
         try {

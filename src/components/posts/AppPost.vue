@@ -52,7 +52,8 @@
 </template>
 
 <script>
-import UserNameMap from '@/services/UserNameMap';
+// import UserNameMap from '@/services/UserNameMap';
+import usersService from '../../services/usersService';
 import { mapActions } from 'vuex';
 import AppPostHeader from '@/components/posts/AppPostHeader';
 import AppPostFooter from '@/components/posts/AppPostFooter';
@@ -62,7 +63,7 @@ export default {
         return {
             API_IMG: process.env.VUE_APP_IMG_URL,
             showLikes: false,
-            UserNameMap: UserNameMap,
+            // UserNameMap: usersService,
             postedBy: '',
             likes: {},
             isRequest: false
@@ -112,7 +113,7 @@ export default {
     methods: {
         ...mapActions(['updatePostImage', 'likeToPost']),
         async getNameByID (id) {
-            const result = await UserNameMap.getUserName(id);
+            const result = await usersService.getUserById(id);
             return result;
         },
         async sendImage (event) {
@@ -154,11 +155,13 @@ export default {
     async mounted () {
         if (this.post.dateCreated) {
             if (this.post?.postedBy) {
-                const result = await UserNameMap.getUserName(this.post.postedBy);
+                // const result = await UserNameMap.getUserName(this.post.postedBy)
+                const result = await usersService.getUserById(this.post.postedBy);
                 this.postedBy = result;
             }
             this.post.likes.forEach(async (likeUserId) => {
-                const name = await UserNameMap.getUserName(likeUserId);
+                const name = await usersService.getUserById(likeUserId);
+                // const name = await UserNameMap.getUserName(likeUserId);
                 this.likes[likeUserId] = name;
             });
         }
