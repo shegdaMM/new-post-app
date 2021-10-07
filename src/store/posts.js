@@ -3,8 +3,8 @@ import router from '../router/index';
 
 const API_URL = process.env.VUE_APP_URL;
 
-const notifyBody = (message) => {
-    return { message: message, place: 'post' };
+const notifyBody = (message, type) => {
+    return { message: message, place: 'post', type: type };
 };
 
 // magic strings
@@ -99,7 +99,7 @@ export default {
                   });
                 } catch (error) {
                   if (payload.id) {
-                    dispatch('errorNotify', notifyBody(error));
+                    dispatch('notify', notifyBody(error, 'error'));
                   }
                 } finally {
                     commit('onloadProcess');
@@ -111,12 +111,13 @@ export default {
                 await axios.delete(postByIdUrl(payload.id)).then(response => {
                   if (response.status === 200) {
                     commit('deletePostById');
-                    dispatch('successNotify', notifyBody('You remove selected post'));
+                    dispatch('notify', notifyBody('You remove selected post', 'success'));
+
                     router.push({ path: '/posts' });
                   }
                 });
               } catch (error) {
-                dispatch('errorNotify', notifyBody(error));
+                dispatch('notify', notifyBody(error, 'error'));
               } finally {
                 commit('onloadProcess');
             }
@@ -138,11 +139,11 @@ export default {
                 })
                 .then(response => {
                     resultStatus = response.data.image;
-                    dispatch('successNotify', notifyBody('You update image for this post!'));
+                    dispatch('notify', notifyBody('You update image for this post!', 'success'));
                 });
             } catch (error) {
                 resultStatus = false;
-                dispatch('errorNotify', notifyBody('You not update post image!'));
+                dispatch('notify', notifyBody('You not update post image!', 'error'));
             } finally {
                 commit('onloadProcess');
             }
@@ -191,7 +192,7 @@ export default {
                 } catch (error) {
                   // error
                   if (payload) {
-                    dispatch('errorNotify', notifyBody(error));
+                    dispatch('notify', notifyBody(error, 'error'));
                   }
             } finally {
                 commit('onloadProcess');
@@ -205,12 +206,12 @@ export default {
             try {
                 await axios.post(postsUrl, payload).then(response => {
                     if (response.status === 200) {
-                        dispatch('successNotify', notifyBody('You create post'));
+                        dispatch('notify', notifyBody('You create post', 'success'));
                         router.push({ path: `/post/${response.data._id}` });
                     }
                 });
             } catch (error) {
-                dispatch('errorNotify', notifyBody(error));
+                dispatch('notify', notifyBody(error, 'error'));
             }
             commit('onloadProcess');
         },
@@ -225,12 +226,12 @@ export default {
                 await axios.patch(postByIdUrl(payload.id), send).then(response => {
                     if (response.status === 200) {
                         commit('updateCurrentPost', response.data);
-                        dispatch('successNotify', notifyBody('You update post'));
+                        dispatch('notify', notifyBody('You update post', 'success'));
                         router.push({ path: `/post/${response.data._id}` });
                     }
                 });
             } catch (error) {
-                dispatch('errorNotify', notifyBody(error));
+                dispatch('notify', notifyBody(error, 'error'));
             }
             commit('onloadProcess');
         }

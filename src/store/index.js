@@ -48,61 +48,52 @@ export default createStore({
     }
   },
   actions: {
-    buildNotify: ({ commit }, payload) => {
-      if (payload?.body?.message) {
+    notify: ({ commit }, payload) => {
+      if (payload?.message) {
         const result = {};
-        console.log(payload?.body);
-        if (typeof payload?.body?.message === 'string') {
-          result.message = payload?.body?.message;
+        console.log(payload?.message);
+        if (typeof payload?.message === 'string') {
+          result.message = payload?.message;
         } else {
-          result.message = payload?.body?.message.message;
+          result.message = payload?.message.message;
         }
         result.type = payload?.type;
         if (payload?.body?.place) {
-          const validation = ['post', 'comment', 'user', 'auth'].indexOf(payload?.body?.place) !== -1;
-          if (validation) result.place = payload?.body?.place;
+          const validation = ['post', 'comment', 'user', 'auth'].indexOf(payload?.place) !== -1;
+          if (validation) result.place = payload?.place;
         }
         commit('setNotify', result);
       }
     },
+    // i not delete this actions, becose I refactoring only posts.js in vuex
     successNotify: ({ commit, dispatch }, payload) => {
       if (payload?.message) {
-        const result = {};
-        result.body = payload;
-        result.type = 'success';
-        dispatch('buildNotify', result);
+        const result = Object.assign({}, payload, { type: 'success' });
+        dispatch('notify', result);
       } else {
         commit('setNotify', null);
       }
     },
     infoNotify: ({ commit, dispatch }, payload) => {
       if (payload?.message) {
-        const result = {};
-        result.body = payload;
-        result.type = 'info';
-        dispatch('buildNotify', result);
+        const result = Object.assign({}, payload, { type: 'info' });
+        dispatch('notify', result);
       } else {
         commit('setNotify', null);
       }
     },
     warningNotify: ({ commit, dispatch }, payload) => {
       if (payload?.message) {
-        const result = {};
-        result.body = payload;
-        result.type = 'warning';
-        dispatch('buildNotify', result);
+        const result = Object.assign({}, payload, { type: 'warning' });
+        dispatch('notify', result);
       } else {
         commit('setNotify', null);
       }
     },
     errorNotify: ({ commit, dispatch }, payload) => {
       if (payload?.message) {
-        const result = {};
-        // analize error
-        // and sent generated message
-        result.body = payload;
-        result.type = 'error';
-        dispatch('buildNotify', result);
+        const result = Object.assign({}, payload, { type: 'error' });
+        dispatch('notify', result);
       } else {
         commit('setNotify', null);
       }
