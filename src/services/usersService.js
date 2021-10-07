@@ -19,6 +19,7 @@ export default class UserServices {
 
     static async userFromMap (id) {
         let result = null;
+        // why if (!UserServices.users.size) allways true?
         if (UserServices.users.size === '0') {
             await UserServices.allUsersToMap();
             console.log(UserServices.users.size);
@@ -43,8 +44,12 @@ export default class UserServices {
 
     static async getCurrentUser (id) {
         if (!UserServices.users.has(id)) {
-            const user = (await axios.get(userUrl(id))).data;
-            UserServices.users.set(id, simplifyObject(user, ['name', 'email']));
+            try {
+                const user = (await axios.get(userUrl(id))).data;
+                UserServices.users.set(id, simplifyObject(user, ['name', 'email']));
+            } catch (error) {
+                // not works any think, where user was deleted from server
+            }
         }
         const result = UserServices.reduceUser(UserServices.users.get(id));
         return result || null;

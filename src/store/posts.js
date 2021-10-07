@@ -2,7 +2,33 @@ import axios from 'axios';
 import router from '../router/index';
 
 const API_URL = process.env.VUE_APP_URL;
-// const IMG_URL = process.env.VUE_APP_IMG_URL;
+
+const notifyBody = (message) => {
+    return { message: message, place: 'post' };
+};
+
+// magic strings
+const postsUrl = `${API_URL}/posts`;
+const postByIdUrl = (id) => {
+    return `${API_URL}/posts/${id}`;
+};
+const postImageUpdateById = (id) => {
+    return `${API_URL}/posts/upload/${id}`;
+};
+const postLikeSendById = (id) => {
+    return `${API_URL}/posts/like/${id}`;
+};
+
+const postListUrl = (payload) => {
+    const params = Object.entries(payload);
+    const url = new URL(`${API_URL}/posts`);
+    params.forEach((param) => {
+        if (param[1]) {
+            url.searchParams.set(param[0], param[1]);
+        }
+    });
+    return url.toString();
+};
 
 export default {
     state: {
@@ -65,16 +91,15 @@ export default {
     actions: {
         getPostById: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
-            const Url = `${API_URL}/posts/${payload.id}`;
             try {
-                await axios.get(Url).then(response => {
+                await axios.get(postByIdUrl(payload.id)).then(response => {
                     if (response.status === 200) {
                       commit('setPostById', response.data);
                     }
                   });
                 } catch (error) {
                   if (payload.id) {
-                    dispatch('errorNotify', { message: error, place: 'post' });
+                    dispatch('errorNotify', notifyBody(error));
                   }
                 } finally {
                     commit('onloadProcess');
@@ -82,17 +107,16 @@ export default {
         },
         removePostById: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
-                const Url = `${API_URL}/posts/${payload.id}`;
             try {
-                await axios.delete(Url).then(response => {
+                await axios.delete(postByIdUrl(payload.id)).then(response => {
                   if (response.status === 200) {
                     commit('deletePostById');
-                    dispatch('successNotify', { message: 'You remove selected post', place: 'post' });
+                    dispatch('successNotify', notifyBody('You remove selected post'));
                     router.push({ path: '/posts' });
                   }
                 });
               } catch (error) {
-                dispatch('errorNotify', { message: error, place: 'post' });
+                dispatch('errorNotify', notifyBody(error));
               } finally {
                 commit('onloadProcess');
             }
@@ -103,11 +127,10 @@ export default {
         updatePostImage: async ({ commit, dispatch }, payload) => {
             let resultStatus;
             commit('onloadProcess');
-            const Url = `${API_URL}/posts/upload/${payload.id}`;
             try {
                 await axios({
                     method: 'put',
-                    url: Url,
+                    url: postImageUpdateById(payload.id),
                     data: payload.image,
                     headers: {
                       'Content-Type': 'multipart/form-data'
@@ -115,11 +138,11 @@ export default {
                 })
                 .then(response => {
                     resultStatus = response.data.image;
-                    dispatch('successNotify', { message: 'You update image for this post!', place: 'post' });
+                    dispatch('successNotify', notifyBody('You update image for this post!'));
                 });
             } catch (error) {
                 resultStatus = false;
-                dispatch('errorNotify', { message: 'You not update post image!', place: 'post' });
+                dispatch('errorNotify', notifyBody('You not update post image!'));
             } finally {
                 commit('onloadProcess');
             }
@@ -127,11 +150,10 @@ export default {
         },
         likeToPost: async ({ commit, dispatch }, payload) => {
             let resultStatus;
-            const Url = `${API_URL}/posts/like/${payload.id}`;
             try {
                 await axios({
                     method: 'put',
-                    url: Url
+                    url: postLikeSendById(payload.id)
                 })
                 .then(response => {
                     resultStatus = true;
@@ -143,7 +165,7 @@ export default {
         },
         getPostsList: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
-            let isAdd = false;
+            /* let isAdd = false;
             let url = `${API_URL}/posts`;
             if (payload?.search) {
                 url += `${isAdd ? '&' : '?'}search=${payload?.search}`;
@@ -154,8 +176,9 @@ export default {
                 isAdd = true;
             }
             url += `${isAdd ? '&' : '?'}limit=${payload?.limit || 0}&skip=${payload?.skip || 0}`;
+            */
             try {
-                await axios.get(url).then(response => {
+                await axios.get(postListUrl(payload)).then(response => {
                     if (response.status === 200) {
                       commit('setPostsListSize', response.data.pagination.total);
                       if (payload.limit === 0) {
@@ -168,7 +191,7 @@ export default {
                 } catch (error) {
                   // error
                   if (payload) {
-                    dispatch('errorNotify', { message: error, place: 'post' });
+                    dispatch('errorNotify', notifyBody(error));
                   }
             } finally {
                 commit('onloadProcess');
@@ -179,37 +202,35 @@ export default {
         }, // not realize
         createPost: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
-            const Url = `${API_URL}/posts`;
             try {
-                await axios.post(Url, payload).then(response => {
+                await axios.post(postsUrl, payload).then(response => {
                     if (response.status === 200) {
-                        dispatch('successNotify', { message: 'You create post', place: 'post' });
+                        dispatch('successNotify', notifyBody('You create post'));
                         router.push({ path: `/post/${response.data._id}` });
                     }
                 });
             } catch (error) {
-                dispatch('errorNotify', { message: error, place: 'post' });
+                dispatch('errorNotify', notifyBody(error));
             }
             commit('onloadProcess');
         },
         patchCurrentPost: async ({ commit, dispatch }, payload) => {
             commit('onloadProcess');
-            const Url = `${API_URL}/posts/${payload._id}`;
             const send = {
                 title: payload.title || '',
                 fullText: payload.fullText || '',
                 description: payload.description || ''
             };
             try {
-                await axios.patch(Url, send).then(response => {
+                await axios.patch(postByIdUrl(payload.id), send).then(response => {
                     if (response.status === 200) {
                         commit('updateCurrentPost', response.data);
-                        dispatch('successNotify', { message: 'You update post', place: 'post' });
+                        dispatch('successNotify', notifyBody('You update post'));
                         router.push({ path: `/post/${response.data._id}` });
                     }
                 });
             } catch (error) {
-                dispatch('errorNotify', { message: error, place: 'post' });
+                dispatch('errorNotify', notifyBody(error));
             }
             commit('onloadProcess');
         }
